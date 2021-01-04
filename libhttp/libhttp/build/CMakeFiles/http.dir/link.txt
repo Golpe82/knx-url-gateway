@@ -1,2 +1,0 @@
-/home/golpe/knxGW/project/gateway/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-ar qc libhttp.a  CMakeFiles/http.dir/http.cpp.o
-/home/golpe/knxGW/project/gateway/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-ranlib libhttp.a
