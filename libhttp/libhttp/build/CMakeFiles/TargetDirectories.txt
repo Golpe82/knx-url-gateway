@@ -1,0 +1,3 @@
+/home/golpe/knxGW/project/gateway/libhttp/libhttp/build/CMakeFiles/rebuild_cache.dir
+/home/golpe/knxGW/project/gateway/libhttp/libhttp/build/CMakeFiles/http.dir
+/home/golpe/knxGW/project/gateway/libhttp/libhttp/build/CMakeFiles/edit_cache.dir
