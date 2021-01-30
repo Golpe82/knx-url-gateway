@@ -6,15 +6,15 @@ cmake_minimum_required(VERSION 3.7.2)
 project (KnxHttpGateway CXX)
 
 # Create variables that holds the path to our libraries
-set (HTTP_PATH /home/golpe/knxGW/project/gateway/libhttp/libhttp/build)
-set (KNX_MNG_PATH /home/golpe/knxGW/project/gateway/libknx-manage/libknx/manage/build)
-set (KNX_CTRL_PATH /home/golpe/knxGW/project/gateway/libknx-control/libknx/control/build)
+set (HTTP_PATH /home/golpe/knx_project/knx_url_gateway/libhttp/libhttp/build)
+set (KNX_MNG_PATH /home/golpe/knx_project/knx_url_gateway/libknx-manage/libknx/manage/build)
+set (KNX_CTRL_PATH /home/golpe/knx_project/knx_url_gateway/libknx-control/libknx/control/build)
 
 #add headers
 include_directories (
-    /home/golpe/knxGW/project/gateway/libhttp/libhttp/
-    /home/golpe/knxGW/project/gateway/libknx-manage/libknx/manage/
-    /home/golpe/knxGW/project/gateway/libknx-control/libknx/control/
+    /home/golpe/knx_project/knx_url_gateway/libhttp/libhttp/
+    /home/golpe/knx_project/knx_url_gateway/libknx-manage/libknx/manage/
+    /home/golpe/knx_project/knx_url_gateway/libknx-control/libknx/control/
 )
 
 # find library objects
@@ -33,7 +33,7 @@ endif()
 
 # Add main file to our executable output
 add_executable(KnxHttpGateway
-    /home/golpe/knxGW/project/gateway/main/main.cpp
+    /home/golpe/knx_project/knx_url_gateway/main/main.cpp
 )
 target_include_directories(KnxHttpGateway
 	PUBLIC 
