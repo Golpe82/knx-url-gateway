@@ -26,6 +26,9 @@ int main(void)
                 case 1:   
                     control.SendFrame();
                     break;
+                case 3:   
+                    control.SendFrame();
+                    break;
                 default:
                     std::cout<<"not found"<<std::endl;
                     break;
