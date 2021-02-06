@@ -6,7 +6,7 @@ int main(void)
 {
     bool debug = true;
     httplib::Server serveKnx;
-    serveKnx.Get(R"(^/([0-9]+)/([0-9]+)/([0-9]+)(-an|-aus)?$)", [&](const httplib::Request& req,
+    serveKnx.Get(R"(^/([0-9]+)/([0-9]+)/([0-9]+)(-an|-aus|-|\+)?$)", [&](const httplib::Request& req,
                                                             httplib::Response& res) {
         http request;
         knxManage manage;
