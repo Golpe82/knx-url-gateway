@@ -17,8 +17,7 @@ If there is an incoming request in this form, the server:
 
 # CONFIGURING THE URL SERVER
 
-The gateway folder must be saved in the device (prototype= raspberry pi) in the folder
-/usr/local
+The gateway folder must be saved in the device (prototype= raspberry pi) in the folder `/usr/local/`.
 
 1. Add this in the `/boot/config.txt` of the raspberry pi:
     ```bash
