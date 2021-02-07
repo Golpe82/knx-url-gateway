@@ -25,6 +25,7 @@ int main(void)
                 switch (control.GetDpt()){
                 case 1:
                     control.SendFrame();
+                    res.set_content(manage.xmlResp(request.GetValueStr()), "text/plain");
                     break;
                 case 3:  
                     control.SendFrame();
@@ -42,7 +43,6 @@ int main(void)
                 break;
             }
         }
-        res.set_content(manage.xmlResp(request.GetValueStr()), "text/plain");
     });
     serveKnx.listen("0.0.0.0", 1234);
 }
