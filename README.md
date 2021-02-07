@@ -1,10 +1,9 @@
-Created by Simón Golpe Varela  
-Berlin 2020.02.17
-
 # FUNCTIONALITY DESCRIPTION
 
 The core of the KNX URL Gateway consists of a server that handle URL´s in this form:  
-`http://ipaddressofthegateway:1234/knx/group/address-value`
+`http://ipaddressofthegateway:1234/knx/group/address-value`  
+
+Valid values are `an` for switch on, `aus` for switch off, `plus` for dimm up and `minus` for dimm down.  
 
 If there is an incoming request in this form, the server:
 
@@ -46,3 +45,7 @@ The gateway folder must be saved in the device (prototype= raspberry pi) in the 
 `/usr/local/gateway`
 
 8. Reboot the device
+
+Mantainer: Golpe Varela, Simón
+
+2018 - current 
