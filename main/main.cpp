@@ -6,7 +6,7 @@ int main(void)
 {
     bool debug = true;
     httplib::Server serveKnx;
-    serveKnx.Get(R"(^/([0-9]+)/([0-9]+)/([0-9]+)(-an|-aus)?$)", [&](const httplib::Request& req,
+    serveKnx.Get(R"(^/([0-9]+)/([0-9]+)/([0-9]+)(-an|-aus|-minus|-plus)?$)", [&](const httplib::Request& req,
                                                             httplib::Response& res) {
         http request;
         knxManage manage;
@@ -21,9 +21,13 @@ int main(void)
                 break;
             case 1:
                 if(debug) manage.print(3);
-                control.SetData(request.GetRequestStr(), manage.GetDatapointtypeStr()); 
+                control.SetData(request.GetRequestStr(), manage.GetDatapointtypeStr());
                 switch (control.GetDpt()){
-                case 1:   
+                case 1:
+                    control.SendFrame();
+                    res.set_content(manage.xmlResp(request.GetValueStr()), "text/plain");
+                    break;
+                case 3:  
                     control.SendFrame();
                     break;
                 default:
@@ -39,7 +43,6 @@ int main(void)
                 break;
             }
         }
-        res.set_content(manage.xmlResp(request.GetValueStr()), "text/plain");
     });
     serveKnx.listen("0.0.0.0", 1234);
 }
