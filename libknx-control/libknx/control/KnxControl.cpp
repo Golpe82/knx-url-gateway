@@ -2,10 +2,16 @@
 
 bool knxControl::SetData(std::vector<std::string>req_str, std::string dpt_str){
   bool not_setted= true;
+  std::cout << req_str[0] << std::endl;
+  std::cout << req_str[1] << std::endl;
+  std::cout << req_str[2] << std::endl;
+  std::cout << req_str[3] << std::endl;
   if(not_setted){
     //set value
     if(req_str[3]=="-an") value_= kBool[1];
     else if(req_str[3]=="-aus") value_=kBool[0];
+    else if(req_str[3]=="-minus") value_=kDimm[1];
+    else if(req_str[3]=="-plus") value_=kDimm[0];
     //set groupaddress
     main_gr_= (uint8_t)stoi(req_str[0]);
     midd_gr_= (uint8_t)stoi(req_str[1]);
