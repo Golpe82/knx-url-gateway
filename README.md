@@ -46,9 +46,9 @@ The gateway folder must be saved in the device (prototype= raspberry pi) in the 
 8. Reboot the device
 
 # Read KNX traffic from the ttyAMA0 interface:
-`sudo socat -x /dev/ttyAMA0,raw,echo=0,crnl PTY,link=/dev/ttyV1,raw,echo=0,crnl`
+`sudo socat -x -u /dev/ttyAMA0,raw,echo=0,crnl PTY,link=/dev/ttyV1,raw,echo=1,crnl`
 # Read KNX traffic from the ttyAMA0 interface and save it to a file:
-`sudo socat -x /dev/ttyAMA0,raw,echo=0,crnl PTY,link=/dev/ttyV1,raw,echo=1,crnl 2>&1 >/dev/null | tee knx_monitor.txt`
+`sudo socat -x -u /dev/ttyAMA0,raw,echo=0,crnl PTY,link=/dev/ttyV1,raw,echo=1,crnl 2>&1 >/dev/null | tee knx_monitor.txt`
 
 Mantainer: Golpe Varela, Simón
 
