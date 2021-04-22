@@ -13,7 +13,7 @@ If there is an incoming request in this form, the server:
 
 - the server sends the built frame to the KNX bus.
 
-[Here](https://gitlab.com/simon.golpe/iot_knx-gateway/-/blob/master/ga.csv) is a .csv file example.
+[Here](https://gitlab.com/simon.golpe/iot_knx-gateway/-/blob/master/ga.example.csv) is a .csv file example.
 
 # CONFIGURING THE URL SERVER
 
@@ -45,9 +45,12 @@ The gateway folder must be saved in the device (prototype= raspberry pi) in the 
 
 8. Reboot the device
 
-# Read KNX traffic from the ttyAMA0 interface:
+# Reading KNX traffic:
+## with the [busmonitor script](https://gitlab.com/simon.golpe/iot_knx-gateway/-/blob/master/knx_monitor.py) (wip):
+`python3 /usr/local/gateway/knx_monitor.py`
+## with socat:
 `sudo socat -x -u /dev/ttyAMA0,raw,echo=0,crnl PTY,link=/dev/ttyV1,raw,echo=1,crnl`
-# Read KNX traffic from the ttyAMA0 interface and save it to a file:
+## saving socat output to a file:
 `sudo socat -x -u /dev/ttyAMA0,raw,echo=0,crnl PTY,link=/dev/ttyV1,raw,echo=1,crnl 2>&1 >/dev/null | tee knx_monitor.txt`
 
 Mantainer: Golpe Varela, Simón
