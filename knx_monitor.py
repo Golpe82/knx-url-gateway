@@ -11,17 +11,26 @@ class Bytes:
     STARTBYTE = 0
     DEST_HIGH_BYTE = 11
     DEST_LOW_BYTE = 12
-    BOOL_VALUE = 15
-
+    PAYLOAD = {'Byte0': 15}
 
 class BytesValues:
     STARTBYTE = '68'
-    STOPBYTE = '16'
-    DIRECTION = {
-        'read': ''
+    PAYLOAD = {
+        'DPT1': {'81': 'on', '80': 'off'}
     }
-    BOOL = {'81': 'on', '80': 'off'}
+    STOPBYTE = '16'
 
+def read_frame():
+    dataframe = init_dataframe()
+    current_byte = dataframe.get('current_byte')
+    frame = dataframe.get('frame')
+    
+    while current_byte != BytesValues.STOPBYTE:
+        current_byte = hex_to_string(connection.read())
+        frame = check_startbyte(frame)
+        frame.append(current_byte)
+    
+    return frame
 
 def init_dataframe():
     return {'current_byte': 'FF', 'frame': []}
@@ -30,10 +39,17 @@ def hex_to_string(hex_value):
     return hex_decode(hex_value)[0].strip()
 
 def check_startbyte(frame):
-    if frame and frame[Bytes.STARTBYTE] != BytesValues.STARTBYTE:
+    first_byte_not_startbyte = frame and frame[Bytes.STARTBYTE] != BytesValues.STARTBYTE
+
+    if first_byte_not_startbyte:
             frame.pop(Bytes.STARTBYTE)
 
     return frame
+
+def get_status(frame):
+    return {
+            get_groupaddress(frame).get('formatted'): get_value(frame).get('formatted')
+        }
 
 def get_groupaddress(frame):
     raw_address = f"{ frame[Bytes.DEST_HIGH_BYTE] } { frame[Bytes.DEST_LOW_BYTE] }"
@@ -48,30 +64,19 @@ def get_groupaddress(frame):
     return {'raw': raw_address, 'formatted': groupaddress}
 
 def get_value(frame):
-    raw_value = frame[Bytes.BOOL_VALUE]
-    formatted_value = BytesValues.BOOL[raw_value]
+    raw_value = frame[Bytes.PAYLOAD.get('Byte0')]
+    formatted_value = BytesValues.PAYLOAD.get('DPT1')[raw_value]
 
     return {'raw': raw_value, 'formatted': formatted_value}
-
 
 with serial.Serial(
     KnxSerial.DEVICE, KnxSerial.BAUDRATE, KnxSerial.CHARACTER_SIZE, KnxSerial.PARITY
     ) as connection:
 
     while True:
-        
-        dataframe = init_dataframe()
-        #get frame
-        current_byte = dataframe.get('current_byte')
-        frame = dataframe.get('frame')
-        
-        while current_byte != BytesValues.STOPBYTE:
-            current_byte = hex_to_string(connection.read())
-            frame = check_startbyte(frame)
-            frame.append(current_byte)
-
-        print(frame)
+        frame = read_frame()
+        status = get_status(frame)
+        save_status(status)
         # get groupaddress raw and formatted
         # check datapointtype in .csv
-        # print(frame)
-        print(get_groupaddress(frame).get('formatted'), get_value(frame).get('formatted'))
+        print(status)
