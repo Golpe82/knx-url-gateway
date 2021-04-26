@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+import os
+import re
+import csv
 import serial
-from serial.tools.hexlify_codec import hex_decode
 
 class KnxSerial:
     DEVICE = '/dev/ttyAMA0'
@@ -11,29 +14,40 @@ class Bytes:
     STARTBYTE = 0
     DEST_HIGH_BYTE = 11
     DEST_LOW_BYTE = 12
-    BOOL_VALUE = 15
-
+    PAYLOAD = {'Byte0': 15}
 
 class BytesValues:
     STARTBYTE = '68'
-    STOPBYTE = '16'
-    DIRECTION = {
-        'read': ''
+    PAYLOAD = {
+        'DPT1': {'81': 'on', '80': 'off'}
     }
-    BOOL = {'81': 'on', '80': 'off'}
+    STOPBYTE = '16'
 
 
-def init_dataframe():
-    return {'current_byte': 'FF', 'frame': []}
+def read_frame(connection):
+    frame = []
+    current_byte = 'FF'
 
-def hex_to_string(hex_value):
-    return hex_decode(hex_value)[0].strip()
+    while current_byte != BytesValues.STOPBYTE:
+        current_byte = connection.read().hex()
+        frame = check_startbyte(frame)
+        frame.append(current_byte)
+
+    return frame
 
 def check_startbyte(frame):
-    if frame and frame[Bytes.STARTBYTE] != BytesValues.STARTBYTE:
+    first_byte_not_startbyte = frame and frame[Bytes.STARTBYTE] != BytesValues.STARTBYTE
+
+    if first_byte_not_startbyte:
             frame.pop(Bytes.STARTBYTE)
 
     return frame
+
+def get_status(frame):
+    return {
+            'Groupaddress': get_groupaddress(frame).get('formatted'),
+            'Status': get_value(frame).get('formatted'),
+        }
 
 def get_groupaddress(frame):
     raw_address = f"{ frame[Bytes.DEST_HIGH_BYTE] } { frame[Bytes.DEST_LOW_BYTE] }"
@@ -48,30 +62,64 @@ def get_groupaddress(frame):
     return {'raw': raw_address, 'formatted': groupaddress}
 
 def get_value(frame):
-    raw_value = frame[Bytes.BOOL_VALUE]
-    formatted_value = BytesValues.BOOL[raw_value]
+    raw_value = frame[Bytes.PAYLOAD.get('Byte0')]
+
+    formatted_value = BytesValues.PAYLOAD.get('DPT1')[raw_value]
 
     return {'raw': raw_value, 'formatted': formatted_value}
 
+def writer(filename, status):
+    with open(filename, "w", newline="") as csv_file:
+        stati = csv.DictWriter(csv_file, fieldnames=status.keys())
+        stati.writeheader()
+        stati.writerow(status)
 
-with serial.Serial(
-    KnxSerial.DEVICE, KnxSerial.BAUDRATE, KnxSerial.CHARACTER_SIZE, KnxSerial.PARITY
-    ) as connection:
+def updater(filename, status):
+    with open(filename, newline="") as file:
+        readData = [row for row in csv.DictReader(file)]
+        found = False
+        new_status = {} 
 
-    while True:
-        
-        dataframe = init_dataframe()
-        #get frame
-        current_byte = dataframe.get('current_byte')
-        frame = dataframe.get('frame')
-        
-        while current_byte != BytesValues.STOPBYTE:
-            current_byte = hex_to_string(connection.read())
-            frame = check_startbyte(frame)
-            frame.append(current_byte)
+        for index, raw in enumerate(readData):
+            if status.get('Groupaddress') in readData[index]['Groupaddress']:
+                readData[index]['Status'] = status.get('Status')
+                found = True
+                break
 
-        print(frame)
-        # get groupaddress raw and formatted
-        # check datapointtype in .csv
-        # print(frame)
-        print(get_groupaddress(frame).get('formatted'), get_value(frame).get('formatted'))
+        if not found:
+            new_status = status
+
+    with open(filename, "w", newline="") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames = status.keys())
+        writer.writeheader()
+        writer.writerows(readData)
+
+        if new_status:
+            writer.writerow(new_status)
+
+def save_status(status):
+    FILENAME = 'KNX_stati.csv'
+    print(status)
+    file_exists = os.path.isfile(FILENAME)
+
+    if file_exists:
+        updater(FILENAME, status)
+
+    else:
+        writer(FILENAME, status)
+
+def main():
+    with serial.Serial(
+        KnxSerial.DEVICE, KnxSerial.BAUDRATE, KnxSerial.CHARACTER_SIZE, KnxSerial.PARITY
+        ) as connection:
+
+        while True:
+            frame = read_frame(connection)
+            status = get_status(frame)
+            save_status(status)
+
+            # get groupaddress raw and formatted
+            # check datapointtype in .csv
+
+if __name__ == "__main__":
+    main()
