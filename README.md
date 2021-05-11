@@ -47,8 +47,8 @@ or use the GUI of [this repo](https://gitlab.com/simon.golpe/gateway), after doi
 8. Reboot the device
 
 # Reading KNX traffic:
-## with the [busmonitor script](https://gitlab.com/simon.golpe/iot_knx-gateway/-/blob/master/knx_monitor.py) (wip):
-see [this repo](https://gitlab.com/simon.golpe/gateway) (work in progress)
+## with the busmonitor script:
+see [this repo](https://gitlab.com/simon.golpe/gateway/-/blob/master/iot/knx/monitor/main.py) (work in progress)
 ## with socat:
 `sudo socat -x -u /dev/ttyAMA0,raw,echo=0,crnl PTY,link=/dev/ttyV1,raw,echo=1,crnl`
 ## saving socat output to a file:
