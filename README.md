@@ -9,9 +9,9 @@ If there is an incoming request in this form, the server:
 
 - looks if the KNX groupaddress is in the stored .csv file (this file contains all information about all groupaddresses of the KNX installation and can be exported from the KNX programming tool ETS)
 
-- if the groupaddress exists the server looks in the .csv file for the datapointtype (for instance only boolean/DPT1) and calls the proper method for building the KNX dataframe (Telegram) with the specified value in the URL
+- looks in the .csv file for the datapointtype (for instance only boolean/DPT1 and relative dimming/DPT3) and calls the proper method for building the KNX dataframe (Telegram) with the specified value in the URL, if the groupaddress exists
 
-- the server sends the built frame to the KNX bus.
+- sends the built frame to the KNX bus
 
 [Here](https://gitlab.com/simon.golpe/iot_knx-gateway/-/blob/master/ga.example.csv) is a .csv file example.
 
@@ -41,13 +41,14 @@ The gateway folder must be saved in the device (prototype= raspberry pi) in the 
 `@reboot /usr/local/gateway/launcher.sh >/usr/local/gateway/cronlog 2>&1`
 
 7. Save the newest .csv file with your knx groupaddresses here:  
-`/usr/local/gateway`
+`/usr/local/gateway`,
+or use the GUI of [this repo](https://gitlab.com/simon.golpe/gateway), after doing point 8.
 
 8. Reboot the device
 
 # Reading KNX traffic:
 ## with the [busmonitor script](https://gitlab.com/simon.golpe/iot_knx-gateway/-/blob/master/knx_monitor.py) (wip):
-`python3 /usr/local/gateway/knx_monitor.py`
+see [this repo](https://gitlab.com/simon.golpe/gateway) (work in progress)
 ## with socat:
 `sudo socat -x -u /dev/ttyAMA0,raw,echo=0,crnl PTY,link=/dev/ttyV1,raw,echo=1,crnl`
 ## saving socat output to a file:
