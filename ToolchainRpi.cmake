@@ -9,8 +9,8 @@ SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_SYSTEM_VERSION 1)
 
 #Define cross compiler locations
-SET(CMAKE_C_COMPILER /home/golpe/knx_project/knx_url_gateway/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-cc)
-SET(CMAKE_CXX_COMPILER /home/golpe/knx_project/knx_url_gateway/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-c++)
+SET(CMAKE_C_COMPILER /home/golpe/knx/url_gateway/iot_knx-gateway/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-cc)
+SET(CMAKE_CXX_COMPILER /home/golpe/knx/url_gateway/iot_knx-gateway/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-c++)
 
 # Define the sysroot path for the RaspberryPi distribution in our tools folder
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
