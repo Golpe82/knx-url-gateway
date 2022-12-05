@@ -3,6 +3,7 @@
 
 #for crosscompile, clone first the Raspberry pi tools from here https://github.com/raspberrypi/tools
 #replace /home/golpe/knxGW/project/gateway/tools/ by the path where you have the Raspberry tools
+# Manual for crosscompile: https://medium.com/@au42/the-useful-raspberrypi-cross-compile-guide-ea56054de187
 
 #Define your host system
 SET(CMAKE_SYSTEM_NAME Linux)
