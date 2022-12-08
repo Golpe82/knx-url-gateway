@@ -19,7 +19,7 @@ class knxControl{
         uint8_t main_gr_;
         uint8_t midd_gr_;
         uint8_t addr_;  
-        uint8_t value_;
+        std::vector <uint8_t> value_{0xFF};
         uint8_t control_byte_{0x73};
         uint8_t chksum_{0x00};
         std::vector<uint8_t> ga_{0xFF,0xFF,0xFF};
@@ -31,7 +31,7 @@ class knxControl{
         const std::vector<uint8_t> kFt1_2{0x68,0x16}; //start and end byte of FT1.2 protocol
         std::vector <uint8_t> header_{kFt1_2[0],0xFF,0xFF,kFt1_2[0],0xFF};
         std::vector <uint8_t> tail_{0xFF,kFt1_2[1]};
-        std::vector <uint8_t> body_{0x11,0x00,0xBC,0xE0,kSa[0],kSa[1],0xFF,0xFF,0x01,0x00,0xFF};
+        std::vector <uint8_t> body_{0x11,0x00,0xBC,0xE0,kSa[0],kSa[1],0xFF,0xFF,0x01,0x00,value_[0]};
         std::vector <uint8_t> frame_; //hole Data.req frame
         
         //frame for link layer on:
@@ -42,7 +42,7 @@ class knxControl{
         uint8_t GetMainGr()const{return main_gr_;}
         uint8_t GetMiddGr()const{return midd_gr_;}
         uint8_t GetAddr()const{return addr_;}
-        uint8_t GetValue()const{return value_;}
+        std::vector<uint8_t> GetValue()const{return value_;}
         std::vector<uint8_t> GetGa()const{return ga_;}
         int GetDpt()const{return dpt_;}
         bool SetData(std::vector<std::string>req_str, std::string dpt_str); //converts data strings
