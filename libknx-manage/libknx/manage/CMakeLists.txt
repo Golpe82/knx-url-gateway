@@ -8,11 +8,11 @@ project (knx-manage CXX)
 # make this output a static library 
 add_library (knx-manage 
     STATIC 
-    /home/golpe/knx_project/knx_url_gateway/libknx-manage/libknx/manage/KnxManage.cpp 
+    /home/golpe/knx/url_gateway/iot_knx-gateway/libknx-manage/libknx/manage/KnxManage.cpp 
 )
 
 #include header files
 target_include_directories (knx-manage 
     PUBLIC 
-    /home/golpe/knx_project/knx_url_gateway/libknx-manage/libknx/manage/
+    /home/golpe/knx/url_gateway/iot_knx-gateway/libknx-manage/libknx/manage/
 )

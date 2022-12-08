@@ -8,13 +8,13 @@ project (http CXX)
 # make this output a static library
 add_library (http 
     STATIC 
-    /home/golpe/knx_project/knx_url_gateway/libhttp/libhttp/http.cpp 
+    /home/golpe/knx/url_gateway/iot_knx-gateway/libhttp/libhttp/http.cpp 
 )
 
 #include header files
 target_include_directories (http 
     PUBLIC 
-    /home/golpe/knx_project/knx_url_gateway/libhttp/libhttp
-    /home/golpe/knx_project/knx_url_gateway/libhttp/thirdparty
+    /home/golpe/knx/url_gateway/iot_knx-gateway/libhttp/libhttp
+    /home/golpe/knx/url_gateway/iot_knx-gateway/libhttp/thirdparty
 )
 
