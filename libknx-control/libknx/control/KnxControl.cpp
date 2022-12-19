@@ -1,50 +1,54 @@
 #include "./KnxControl.hpp"
-// TODO: clean up and refactor this code
-///////
-// write this + knxfloat to number in a extra module
-int ConvertNumberToKNXFloat( float number )
-{
-  // do range check
-  if (number <= -671088.64) {
-    return 0xffff;
-  }
 
-  if (number >= 670760.96) {
-    return 0x7fff;
+using namespace std;
+
+
+vector<uint8_t> ConvertNumberToKNXFloat(float number)
+{
+  float min_value = -671088.64;
+  float max_value = 670760.96;
+  bool number_is_invalid = (number <= min_value) || (number >= max_value);
+
+  if (number_is_invalid)
+  {
+    cout << fixed;
+    cout << setprecision(2);
+    cout << "Number out of rage. Number " << number << endl;
+    return {0x7f, 0xff};
   }
 
   number = (number * 100.0);
-  int number_i = (int)number;
-  std::cout<<number_i<<std::endl;
+  uint16_t number_i = (uint16_t)number;
+  uint16_t sign = 0;
 
-  int sign = 0;
-  int exponent = 0;
-  int mantisse = 0;
-
-  if (number < 0) {
+  if (number < 0)
+  {
     sign = 1;
-    number_i = std::abs(number_i);
+    number_i = abs(number_i);
   }
 
-  mantisse = number_i;
+  uint16_t mantisse = number_i;
+  uint16_t exponent = 0;
 
-  while (mantisse > 2047) {
+  while (mantisse > 2047)
+  {
     mantisse >>= 1;
     exponent++;
   }
 
   if (sign == 1)
   {
-    std::cout<<"too hard in python  use C"<<std::endl;
-    int comp;
-    comp = ~mantisse + 1;
-    comp &= 0x7ff;
-    mantisse = comp;
+    uint16_t complement = ~mantisse + 1;
+    complement &= (uint16_t)0x7ff;
+    mantisse = complement;
   }
+  uint16_t knx_float = (sign << 15) | (exponent << 11) | mantisse;
+  uint8_t mso = (uint8_t)(knx_float >> 8);
+  uint8_t lso = (uint8_t)(knx_float & 0xFF);
 
-  return (sign << 15) | (exponent << 11) | mantisse;
+  return {mso, lso};
 }
-//////
+
 
 bool is_valid_dpt(std::string dpt, std::vector<std::string> kDatapointtypes){
     bool is_valid_dpt = false;
@@ -64,9 +68,10 @@ bool is_valid_dpt(std::string dpt, std::vector<std::string> kDatapointtypes){
 int get_dpt (std::string str, std::vector<std::string> datapoint_types) {
     bool is_dpst = str.find("DPST-")!=std::string::npos;
     bool is_dpt = str.find("DPT-")!=std::string::npos;
-    std::string dpt_str_full = str.substr(str.find("-") + 1);
-    std::cout << "Datapoint type string: "<< dpt_str_full << std::endl;
-    std::string dpt = "0";
+    string dpt_str = str.substr(0, str.size()-1);
+    string dpt_str_full = dpt_str.substr(dpt_str.find("-") + 1);
+    cout << "Datapoint type string: "<< dpt_str_full << std::endl;
+    string dpt = "0";
 
     if (is_dpst) {
         int pos = dpt_str_full.find("-");
@@ -129,13 +134,10 @@ bool knxControl::SetData(std::vector<std::string> req_str, std::string dpt_str)
       std::string value_string = value_request.substr(value_request.find("=") + 1);
       std::cout << "Setting celsius value: " << value_string << std::endl;
       value_.resize(2); //+ 2 octets for DPT9
-      // 27°C
-      // value_[0] = 0x0D;
-      // value_[1] = 0x46;
       float value_float = std::stof(value_string);
-      int knx_float = ConvertNumberToKNXFloat(value_float);
-      value_[0] = (knx_float&0xFF00)>>8;
-      value_[1] = (knx_float&0x00FF);
+      vector<uint8_t> knx_float = ConvertNumberToKNXFloat(value_float);
+      value_[0] = knx_float[0];
+      value_[1] = knx_float[1];
     }
     else
       std::cout << "unvalid value" << std::endl;
@@ -169,7 +171,6 @@ bool knxControl::SendFrame()
   else if (dpt_==9)
   {
     body_[10] = kBool[0];
-    std::cout << "Expanding frame body " << std::endl;
     body_.resize(13); // 2 octets more for DPT9
     body_[8] = 0x03; // APDU + data
     body_[11] = value_[0];
