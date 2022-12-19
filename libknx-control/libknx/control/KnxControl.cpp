@@ -1,9 +1,7 @@
 #include "./KnxControl.hpp"
 
-using namespace std;
 
-
-vector<uint8_t> ConvertNumberToKNXFloat(float number)
+std::vector<uint8_t> knxControl::ConvertNumberToKNXFloat(float number)
 {
   float min_value = -671088.64;
   float max_value = 670760.96;
@@ -11,9 +9,9 @@ vector<uint8_t> ConvertNumberToKNXFloat(float number)
 
   if (number_is_invalid)
   {
-    cout << fixed;
-    cout << setprecision(2);
-    cout << "Number out of rage. Number " << number << endl;
+    std::cout << std::fixed;
+    std::cout << std::setprecision(2);
+    std::cout << "Number out of rage. Number " << number << std::endl;
     return {0x7f, 0xff};
   }
 
@@ -50,28 +48,13 @@ vector<uint8_t> ConvertNumberToKNXFloat(float number)
 }
 
 
-bool is_valid_dpt(std::string dpt, std::vector<std::string> kDatapointtypes){
-    bool is_valid_dpt = false;
-    int count = 0;
-    size_t pos = std::string::npos;
-
-    do
-    {
-        pos = kDatapointtypes[count].find(dpt);
-        is_valid_dpt = kDatapointtypes[count] == dpt;
-        count++;
-    } while (count < kDatapointtypes.size() && !is_valid_dpt);
-
-    return is_valid_dpt;
-}
-
-int get_dpt (std::string str, std::vector<std::string> datapoint_types) {
+int knxControl::GetDatapointType (std::string str) {
     bool is_dpst = str.find("DPST-")!=std::string::npos;
     bool is_dpt = str.find("DPT-")!=std::string::npos;
-    string dpt_str = str.substr(0, str.size()-1);
-    string dpt_str_full = dpt_str.substr(dpt_str.find("-") + 1);
-    cout << "Datapoint type string: "<< dpt_str_full << std::endl;
-    string dpt = "0";
+    std::string dpt_str = str.substr(0, str.size()-1);
+    std::string dpt_str_full = dpt_str.substr(dpt_str.find("-") + 1);
+    std::cout << "Datapoint type string: "<< dpt_str_full << std::endl;
+    std::string dpt = "0";
 
     if (is_dpst) {
         int pos = dpt_str_full.find("-");
@@ -102,11 +85,26 @@ int get_dpt (std::string str, std::vector<std::string> datapoint_types) {
         std::cout << "No DPT or DPST found" << std::endl;
     }
     //check if in constants
-    if (!is_valid_dpt(dpt, datapoint_types)){
+    if (!is_valid_dpt(dpt)){
         std::cout << "Datapoint type not in dpt constants " << dpt << std::endl;
     }
 
-    return stoi(dpt);
+    return std::stoi(dpt);
+}
+
+bool knxControl::is_valid_dpt(std::string dpt){
+    bool is_valid_dpt = false;
+    int count = 0;
+    size_t pos = std::string::npos;
+
+    do
+    {
+        pos = kDatapointtypes[count].find(dpt);
+        is_valid_dpt = kDatapointtypes[count] == dpt;
+        count++;
+    } while (count < kDatapointtypes.size() && !is_valid_dpt);
+
+    return is_valid_dpt;
 }
 
 bool knxControl::SetData(std::vector<std::string> req_str, std::string dpt_str)
@@ -135,7 +133,7 @@ bool knxControl::SetData(std::vector<std::string> req_str, std::string dpt_str)
       std::cout << "Setting celsius value: " << value_string << std::endl;
       value_.resize(2); //+ 2 octets for DPT9
       float value_float = std::stof(value_string);
-      vector<uint8_t> knx_float = ConvertNumberToKNXFloat(value_float);
+      std::vector<uint8_t> knx_float = ConvertNumberToKNXFloat(value_float);
       value_[0] = knx_float[0];
       value_[1] = knx_float[1];
     }
@@ -148,7 +146,7 @@ bool knxControl::SetData(std::vector<std::string> req_str, std::string dpt_str)
     addr_ = (uint8_t)stoi(req_str[2]);
     ga_ = {main_gr_, midd_gr_, addr_};
 
-    dpt_ = get_dpt(dpt_str, kDatapointtypes);
+    dpt_ = GetDatapointType(dpt_str);
     not_set = false;
   }
   return not_set;
