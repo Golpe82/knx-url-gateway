@@ -38,7 +38,9 @@ private:
     // frame for link layer on:
     const std::vector<uint8_t> kLlon{kFt1_2[0], 0x09, 0x09, kFt1_2[0], 0x73, 0xF6, 0x00, 0x08, 0x01, 0x34, 0x10, 0x01, 0x00, 0xB7, kFt1_2[1]};
     std::vector<uint8_t> ConvertNumberToKNXFloat(float number);
-    int GetDatapointType (std::string str);
+    uint8_t GetDatapointType (std::string str);
+    void SetGroupaddress(std::string main_group, std::string mid_group, std::string address);
+    void SetValue(std::string requested_value);
     bool is_valid_dpt(std::string dpt);
 
 public:
