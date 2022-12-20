@@ -33,6 +33,7 @@ private:
     std::vector<uint8_t> header_{kFt1_2[0], 0xFF, 0xFF, kFt1_2[0], 0xFF};
     std::vector<uint8_t> tail_{0xFF, kFt1_2[1]};
     std::vector<uint8_t> body_{0x11, 0x00, 0xBC, 0xE0, kSa[0], kSa[1], 0xFF, 0xFF, 0x01, 0x00, value_[0]};
+
     std::vector<uint8_t> frame_; // whole Data.req frame
 
     // frame for link layer on:
@@ -50,7 +51,7 @@ public:
     std::vector<uint8_t> GetValue() const { return value_; }
     std::vector<uint8_t> GetGa() const { return ga_; }
     int GetDpt() const { return dpt_; }
-    bool SetData(std::vector<std::string> req_str, std::string dpt_str); // converts data strings
+    void SetData(std::vector<std::string> req_str, std::string dpt_str); // converts data strings
     bool SendFrame();                                                    // calculates frame and sends it to the KNX bus
 };
 #endif

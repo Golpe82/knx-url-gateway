@@ -115,19 +115,11 @@ bool knxControl::is_valid_dpt(std::string dpt)
   return is_valid_dpt;
 }
 
-bool knxControl::SetData(std::vector<std::string> req_str, std::string dpt_str)
+void knxControl::SetData(std::vector<std::string> req_str, std::string dpt_str)
 {
-  bool not_set = true;
-
-  if (not_set)
-  {
-    SetGroupaddress(req_str[0], req_str[1], req_str[2]);
-    SetValue(req_str[3]);
-    dpt_ = GetDatapointType(dpt_str);
-    not_set = false;
-  }
-
-  return not_set;
+  SetGroupaddress(req_str[0], req_str[1], req_str[2]);
+  SetValue(req_str[3]);
+  dpt_ = GetDatapointType(dpt_str);
 }
 
 void knxControl::SetGroupaddress(std::string main_group, std::string mid_group, std::string address)
