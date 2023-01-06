@@ -1,3 +1,16 @@
+**HINT**  
+For developing remote on the raspberry pi with vscode in your local machine with root permissions:  
+1. install vscode extension ssh-remote
+2. on the remote machine (raspberry) add this at the end of `/etc/ssh/sshd_conf`:  
+```
+# Allow root login only for localhost
+Match Address 127.0.0.1
+        PermitRootLogin yes
+```
+3. Type this in the raspi terminal `sudo systemctl restart sshd.service`  
+4. Go to the ssh-remote extension tab in the vscode of your local machine and start a connection to the remote raspberry pi
+5. Go to the extensions tab in vscode. Now you can install your local vscode extensions in your remote machine
+
 # FUNCTIONALITY DESCRIPTION
 
 The core of the KNX URL Gateway consists of a server that handle URL´s in this form:  
