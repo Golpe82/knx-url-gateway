@@ -4,6 +4,18 @@ static const float min_value = -671088.64;
 static const float max_value = 670760.96;
 static const std::vector<uint8_t> invalid_float{0x7F, 0xFF};
 
+
+void knxControl::ConvertStringToKNXString(std::string value_string, std::vector<char> knx_char_array) 
+{
+    // cut input string length to 14
+    value_string.resize(14);
+
+	  cout<<"String to KNXString conversion:\n";
+    for (int x = 0; x < sizeof(value_string); x++) { 
+        knx_char_array[x] = value_string[x]; 
+    } 
+}
+
 std::vector<uint8_t> knxControl::ConvertNumberToKNXFloat(float number)
 {
   bool number_is_invalid = (number <= min_value) || (number >= max_value);
@@ -149,6 +161,19 @@ void knxControl::SetValue(std::string requested_value)
       std::vector<uint8_t> knx_float = ConvertNumberToKNXFloat(value_float);
       value_[0] = knx_float[0];
       value_[1] = knx_float[1];
+    }
+    else if (requested_value.find("-contact=") != std::string::npos)
+    {
+      std::string value_string = requested_value.substr(requested_value.find("=") + 1);
+      std::cout << "SIP number value: " << value_string << std::endl;
+      // std::vector<uint8_t>  value is an int type not 8bit Byte??
+      value_.resize(14); //+ 14 octets for DPT14
+
+      // std::vector<uint8_t>  value is an int type not 8bit Byte??
+      std::vector<char> knx_char_array(14);
+      ConvertStringToKNXString(value_string, knx_char_array);
+      // copy KNX 14 x char into value array
+      value_ = knx_char_array;
     }
     else
       std::cout << "invalid value" << std::endl;
