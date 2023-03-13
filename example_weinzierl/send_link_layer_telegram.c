@@ -209,10 +209,10 @@ int main(void)
     *p++ = 0x00;                /* Additional info */
     *p++ = 0x9c;                /* Control field 1 */
     *p++ = 0xe0;                /* Control field 2 */
-    *p++ = 0x21;                /* Source address (hi) */
-    *p++ = 0x20;                /* Source address (lo) */
-    *p++ = 0x7b;                /* Destination address (hi) */
-    *p++ = 0x01;                /* Destination address (lo) */
+    *p++ = 0x00;                /* Source address (hi) */
+    *p++ = 0x00;                /* Source address (lo) */
+    *p++ = 0x19;                /* Destination address (hi) */
+    *p++ = 0x0A;                /* Destination address (lo) */
     *p++ = 0x02;                /* L */
     *p++ = 0x00;                /* TPDU */
     *p++ = 0x80;                /* APDU + Length */
