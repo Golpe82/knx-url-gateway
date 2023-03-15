@@ -21,17 +21,18 @@ private:
     uint8_t addr_;
     std::vector<uint8_t> value_{0xFF};
     uint8_t control_byte_{0x73};
+    std::vector<uint8_t> reset_frame{0x10, 0x40, 0x40, 0x16};
     uint8_t chksum_{0x00};
 
     int dpt_ = -1;
     // frame for link layer off:
-    std::vector<uint8_t> lloff_{kFt1_2[0], 0x09, 0x09, kFt1_2[0], 0xFF, 0xF6, 0x00, 0x08, 0x01, 0x34, 0x10, 0x01, 0xF0, 0xFF, kFt1_2[1]};
+    std::vector<uint8_t> lloff_{kFt1_2[0], 0x09, 0x09, kFt1_2[0], 0xFF, 0xF6, 0x00, 0x08, 0x01, 0x34, 0x10, 0x01, 0xF0, 0xA7, kFt1_2[1]};
     uint8_t length_;
     // Data.req frame
     std::vector<uint8_t> ga_{0xFF, 0xFF, 0xFF};
     std::vector<uint8_t> header_{kFt1_2[0], 0xFF, 0xFF, kFt1_2[0], 0xFF};
     std::vector<uint8_t> tail_{0xFF, kFt1_2[1]};
-    std::vector<uint8_t> body_{0x11, 0x00, 0xBC, 0xE0, kSa[0], kSa[1], 0xFF, 0xFF, 0x01, 0x00, value_[0]};
+    std::vector<uint8_t> body_{0x11, 0x00, 0x9C, 0xE0, kSa[0], kSa[1], 0xFF, 0xFF, 0x01, 0x00, value_[0]};
 
     std::vector<uint8_t> frame_; // whole Data.req frame
 
@@ -213,10 +214,17 @@ bool knxControl::SendFrame()
 {
   std::ofstream telegram(kSerial, std::ofstream::out);
 
+  for (int i = 0; i < reset_frame.size(); i++)
+  {
+    telegram << reset_frame[i];
+    std::cout << " " << std::hex << +reset_frame[i];
+  }
+  std::cout << " reset" << std::endl;
+
   for (int i = 0; i < kLlon.size(); i++)
   {
     telegram << kLlon[i];
-    std::cout << std::hex << +kLlon[i];
+    std::cout << " " << std::hex << +kLlon[i];
   }
   std::cout << " Link layer of Kberry switched on" << std::endl;
 
@@ -263,7 +271,7 @@ bool knxControl::SendFrame()
   for (int i = 0; i < frame_.size(); i++)
   {
     telegram << frame_[i];
-    std::cout << std::hex << +frame_[i];
+    std::cout << " " << std::hex << +frame_[i];
   }
   std::cout << " Odd frame sent" << std::endl;
 
@@ -289,25 +297,25 @@ bool knxControl::SendFrame()
 
   lloff_[4] = control_byte_ ^= 1 << 5;
 
-  chksum_ = 0x00;
+  // chksum_ = 0x00;
+
+  // for (int i = 0; i < lloff_.size(); i++)
+  //   chksum_ += lloff_[i];
+  // lloff_[13] = chksum_ += control_byte_;
 
   for (int i = 0; i < lloff_.size(); i++)
-    chksum_ += lloff_[i];
-  lloff_[13] = chksum_ += control_byte_;
-
-  for (int i = 0; i < frame_.size(); i++)
   {
-    telegram << frame_[i];
-    std::cout << std::hex << +lloff_[i];
+    telegram << lloff_[i];
+    std::cout << " " << std::hex << +lloff_[i];
   }
   std::cout << " Link layer of Kberry switched off" << std::endl;
 
   // if(!telegram.good()){
-  std::cout << "Goodbit=" << telegram.good();
-  std::cout << "Eofbit=" << telegram.eof();
-  std::cout << "Failbit=" << telegram.fail();
-  std::cout << "Badbit=" << telegram.bad();
-  std::cout << std::endl;
+  // std::cout << "Goodbit=" << telegram.good();
+  // std::cout << "Eofbit=" << telegram.eof();
+  // std::cout << "Failbit=" << telegram.fail();
+  // std::cout << "Badbit=" << telegram.bad();
+  // std::cout << std::endl;
   //}
 
   //return telegram.good();
@@ -319,7 +327,7 @@ int main(void)
 {
     knxControl control;
 
-    std::vector<std::string> request{"3", "1", "10", "-an"};
+    std::vector<std::string> request{"3", "1", "10", "-aus"};
     std::string dpt = "DPST-1-1";
     control.SetData(request, dpt);
     control.SendFrame();
