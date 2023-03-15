@@ -78,7 +78,7 @@ void *receive_data(void *data)
 
             if(buffer[0] == 0x68)
             {
-                buffer[0] = 0xe5;
+                // buffer[0] = 0xe5;
                 send_data(*f, buffer, 1);
                 printf("\n");
             }
@@ -196,7 +196,7 @@ int main(void)
     *p++ = 0x00;                /* Data */
 
     ft12_send(uart0_f, tx_buffer, p - &tx_buffer[0]);
-    usleep(DELAY*1000);
+    // usleep(DELAY*1000);
 
 
     /*
@@ -213,13 +213,15 @@ int main(void)
     *p++ = 0x00;                /* Source address (lo) */
     *p++ = 0x19;                /* Destination address (hi) */
     *p++ = 0x0A;                /* Destination address (lo) */
-    *p++ = 0x02;                /* L */
+    // *p++ = 0x02;                /* L */
+    *p++ = 0x01;
     *p++ = 0x00;                /* TPDU */
-    *p++ = 0x80;                /* APDU + Length */
-    *p++ = 0x01;                /* Data */
+    // *p++ = 0x80;                /* APDU + Length */
+    // *p++ = 0x01;                /* Data */
+    *p++ = 0x81;
 
     ft12_send(uart0_f, tx_buffer, p - &tx_buffer[0]);
-    usleep(DELAY*1000);
+    // usleep(DELAY*1000);
 
 
     /*
@@ -238,7 +240,7 @@ int main(void)
     *p++ = 0xf0;                /* Data */
 
     ft12_send(uart0_f, tx_buffer, p - &tx_buffer[0]);
-    usleep(DELAY*1000);
+    // usleep(DELAY*1000);
 
 
     /*
@@ -255,7 +257,7 @@ int main(void)
     *p++ = 0x01;                /* Number of items (lo) */
 
     ft12_send(uart0_f, tx_buffer, p - &tx_buffer[0]);
-    usleep(DELAY*1000);
+    // usleep(DELAY*1000);
 
 
     usleep(1000*1000);
