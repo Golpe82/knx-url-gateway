@@ -10,49 +10,51 @@
 class knxControl
 {
 private:
-    const std::vector<std::string> kDatapointtypes{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"};
-    const std::vector<uint8_t> kFt1_2{0x68, 0x16}; // start and end byte of FT1.2 protocol
-    const std::vector<uint8_t> kSa{0x00, 0x00};   // frame source address
-    const std::vector<uint8_t> kBool{0x80, 0x81}; // boolean values
-    const std::vector<uint8_t> kDimm{0x8D, 0x85}; //+6,25% | -6,25%
-    const std::string kSerial{"/dev/ttyAMA0"};
-    uint8_t main_gr_;
-    uint8_t midd_gr_;
-    uint8_t addr_;
-    std::vector<uint8_t> value_{0xFF};
-    uint8_t control_byte_{0x73};
-    std::vector<uint8_t> reset_frame{0x10, 0x40, 0x40, 0x16};
-    uint8_t chksum_{0x00};
+  const std::string kSerial{"/dev/ttyAMA0"};
+  const std::vector<std::string> kDatapointtypes{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"};
+  const std::vector<uint8_t> kFt1_2{0x68, 0x16}; // start and end byte of FT1.2 protocol
+  std::vector<uint8_t> ft12_reset_telegram{0x10, 0x40, 0x40, 0x16};
+  uint8_t control_byte_{0x73}; // ft1.2 control byte even/odd
+  // link layer on telegram:
+  const std::vector<uint8_t> kLlon{
+      kFt1_2[0], 0x09, 0x09, kFt1_2[0], control_byte_, 0xF6, 0x00, 0x08, 0x01, 0x34, 0x10, 0x01, 0x00, 0xB7, kFt1_2[1]};
+  // link layer off telegram:
+  std::vector<uint8_t> lloff_{
+      kFt1_2[0], 0x09, 0x09, kFt1_2[0], 0xFF, 0xF6, 0x00, 0x08, 0x01, 0x34, 0x10, 0x01, 0xF0, 0xA7, kFt1_2[1]};
+  // Data.req telegram
+  std::vector<uint8_t> header_{kFt1_2[0], 0xFF, 0xFF, kFt1_2[0], 0xFF};
+  std::vector<uint8_t> tail_{0xFF, kFt1_2[1]};
+  std::vector<uint8_t> ga_{0xFF, 0xFF, 0xFF};
+  const std::vector<uint8_t> kSa{0x00, 0x00}; // frame source address
+  std::vector<uint8_t> value_{0xFF};
+  std::vector<uint8_t> body_{0x11, 0x00, 0x9C, 0xE0, kSa[0], kSa[1], 0xFF, 0xFF, 0x01, 0x00, value_[0]};
+  std::vector<uint8_t> telegram_; // whole Data.req frame
 
-    int dpt_ = -1;
-    // frame for link layer off:
-    std::vector<uint8_t> lloff_{kFt1_2[0], 0x09, 0x09, kFt1_2[0], 0xFF, 0xF6, 0x00, 0x08, 0x01, 0x34, 0x10, 0x01, 0xF0, 0xA7, kFt1_2[1]};
-    uint8_t length_;
-    // Data.req frame
-    std::vector<uint8_t> ga_{0xFF, 0xFF, 0xFF};
-    std::vector<uint8_t> header_{kFt1_2[0], 0xFF, 0xFF, kFt1_2[0], 0xFF};
-    std::vector<uint8_t> tail_{0xFF, kFt1_2[1]};
-    std::vector<uint8_t> body_{0x11, 0x00, 0x9C, 0xE0, kSa[0], kSa[1], 0xFF, 0xFF, 0x01, 0x00, value_[0]};
+  const std::vector<uint8_t> kBool{0x80, 0x81}; // boolean values
+  const std::vector<uint8_t> kDimm{0x8D, 0x85}; //+6,25% | -6,25%
 
-    std::vector<uint8_t> frame_; // whole Data.req frame
+  uint8_t main_gr_;
+  uint8_t midd_gr_;
+  uint8_t addr_;
+  uint8_t chksum_{0x00};
+  uint8_t length_;
+  int dpt_ = -1;
 
-    // frame for link layer on:
-    const std::vector<uint8_t> kLlon{kFt1_2[0], 0x09, 0x09, kFt1_2[0], 0x73, 0xF6, 0x00, 0x08, 0x01, 0x34, 0x10, 0x01, 0x00, 0xB7, kFt1_2[1]};
-    std::vector<uint8_t> ConvertNumberToKNXFloat(float number);
-    uint8_t GetDatapointType (std::string str);
-    void SetGroupaddress(std::string main_group, std::string mid_group, std::string address);
-    void SetValue(std::string requested_value);
-    bool is_valid_dpt(std::string dpt);
+  std::vector<uint8_t> ConvertNumberToKNXFloat(float number);
+  uint8_t GetDatapointType(std::string str);
+  void SetGroupaddress(std::string main_group, std::string mid_group, std::string address);
+  void SetValue(std::string requested_value);
+  bool is_valid_dpt(std::string dpt);
 
 public:
-    uint8_t GetMainGr() const { return main_gr_; }
-    uint8_t GetMiddGr() const { return midd_gr_; }
-    uint8_t GetAddr() const { return addr_; }
-    std::vector<uint8_t> GetValue() const { return value_; }
-    std::vector<uint8_t> GetGa() const { return ga_; }
-    int GetDpt() const { return dpt_; }
-    void SetData(std::vector<std::string> req_str, std::string dpt_str); // converts data strings
-    bool SendFrame();                                                    // calculates frame and sends it to the KNX bus
+  uint8_t GetMainGr() const { return main_gr_; }
+  uint8_t GetMiddGr() const { return midd_gr_; }
+  uint8_t GetAddr() const { return addr_; }
+  std::vector<uint8_t> GetValue() const { return value_; }
+  std::vector<uint8_t> GetGa() const { return ga_; }
+  int GetDpt() const { return dpt_; }
+  void SetData(std::vector<std::string> req_str, std::string dpt_str); // converts data strings
+  bool SendFrame();                                                    // calculates frame and sends it to the KNX bus
 };
 
 /* Implementation */
@@ -108,7 +110,6 @@ uint8_t knxControl::GetDatapointType(std::string str)
 {
   std::string dpt_str = str.substr(0, str.size() - 1);
   std::string dpt_full_str = dpt_str.substr(dpt_str.find("-") + 1);
-  std::cout << "Datapoint type string: " << dpt_full_str << std::endl;
   std::string dpt = "0";
   bool is_dpt = str.find("DPT-") != std::string::npos;   // Datapoit type
   bool is_dpst = str.find("DPST-") != std::string::npos; // Datapoint subtype
@@ -120,9 +121,7 @@ uint8_t knxControl::GetDatapointType(std::string str)
     if (pos != std::string::npos)
     {
       dpt = dpt_full_str.substr(0, pos);
-      std::cout << "Datapoint type: " << dpt << std::endl;
       std::string dpst = dpt_full_str.substr(pos + 1);
-      std::cout << "Datapoint subtype: " << dpst << std::endl;
     }
     else
     {
@@ -135,7 +134,6 @@ uint8_t knxControl::GetDatapointType(std::string str)
     if (pos == std::string::npos)
     {
       dpt = str.substr(str.find("-") + 1);
-      std::cout << "DPT: " << dpt << std::endl;
     }
     else
     {
@@ -151,6 +149,8 @@ uint8_t knxControl::GetDatapointType(std::string str)
   {
     std::cout << "Datapoint type not in dpt constants " << dpt << std::endl;
   }
+
+  std::cout << "Datapoint type: " << dpt << std::endl;
 
   return (uint8_t)std::stoi(dpt);
 }
@@ -180,53 +180,53 @@ void knxControl::SetData(std::vector<std::string> req_str, std::string dpt_str)
 
 void knxControl::SetGroupaddress(std::string main_group, std::string mid_group, std::string address)
 {
-    main_gr_ = (uint8_t)std::stoi(main_group);
-    midd_gr_ = (uint8_t)std::stoi(mid_group);
-    addr_ = (uint8_t)std::stoi(address);
-    ga_ = {main_gr_, midd_gr_, addr_};
+  main_gr_ = (uint8_t)std::stoi(main_group);
+  midd_gr_ = (uint8_t)std::stoi(mid_group);
+  addr_ = (uint8_t)std::stoi(address);
+  ga_ = {main_gr_, midd_gr_, addr_};
 }
 
 void knxControl::SetValue(std::string requested_value)
 {
-    if (requested_value == "-an")
-      value_[0] = kBool[1];
-    else if (requested_value == "-aus")
-      value_[0] = kBool[0];
-    else if (requested_value == "-minus")
-      value_[0] = kDimm[1];
-    else if (requested_value == "-plus")
-      value_[0] = kDimm[0];
-    else if (requested_value.find("-send_celsius=") != std::string::npos)
-    {
-      std::string value_string = requested_value.substr(requested_value.find("=") + 1);
-      std::cout << "Setting celsius value: " << value_string << std::endl;
-      value_.resize(2); //+ 2 octets for DPT9
-      float value_float = std::stof(value_string);
-      std::vector<uint8_t> knx_float = ConvertNumberToKNXFloat(value_float);
-      value_[0] = knx_float[0];
-      value_[1] = knx_float[1];
-    }
-    else
-      std::cout << "invalid value" << std::endl;
+  if (requested_value == "-an")
+    value_[0] = kBool[1];
+  else if (requested_value == "-aus")
+    value_[0] = kBool[0];
+  else if (requested_value == "-minus")
+    value_[0] = kDimm[1];
+  else if (requested_value == "-plus")
+    value_[0] = kDimm[0];
+  else if (requested_value.find("-send_celsius=") != std::string::npos)
+  {
+    std::string value_string = requested_value.substr(requested_value.find("=") + 1);
+    std::cout << "Setting celsius value: " << value_string << std::endl;
+    value_.resize(2); //+ 2 octets for DPT9
+    float value_float = std::stof(value_string);
+    std::vector<uint8_t> knx_float = ConvertNumberToKNXFloat(value_float);
+    value_[0] = knx_float[0];
+    value_[1] = knx_float[1];
+  }
+  else
+    std::cout << "invalid value" << std::endl;
 }
 
 bool knxControl::SendFrame()
 {
-  std::ofstream telegram(kSerial, std::ofstream::out);
+  std::ofstream telegram_stream(kSerial, std::ofstream::out);
 
-  for (int i = 0; i < reset_frame.size(); i++)
+  for (int i = 0; i < ft12_reset_telegram.size(); i++)
   {
-    telegram << reset_frame[i];
-    std::cout << " " << std::hex << +reset_frame[i];
+    telegram_stream << ft12_reset_telegram[i];
+    std::cout << " " << std::hex << +ft12_reset_telegram[i];
   }
-  std::cout << " reset" << std::endl;
+  std::cout << " FT1.2 reseted" << std::endl;
 
   for (int i = 0; i < kLlon.size(); i++)
   {
-    telegram << kLlon[i];
+    telegram_stream << kLlon[i];
     std::cout << " " << std::hex << +kLlon[i];
   }
-  std::cout << " Link layer of Kberry switched on" << std::endl;
+  std::cout << " Link layer on" << std::endl;
 
   // set data bytes depending on  dpt
   if (dpt_ == 1 || dpt_ == 3)
@@ -241,14 +241,9 @@ bool knxControl::SendFrame()
     body_[12] = value_[1];
   }
 
-  //calculate ga bytes
-
-  body_[6] = (ga_[0] << 3) | ga_[1]; // destination high byte conform to knx standard
+  // calculate destination groupaddress bytes
+  body_[6] = (ga_[0] << 3) | ga_[1]; // destination high byte
   body_[7] = ga_[2];                 // destination low byte
-//   body_[6] = 0x19;
-//   body_[7] = 0x0A;
-//   body_[10] = 0x81;
-
   length_ = header_[1] = header_[2] = body_.size() + 1;
   header_[4] = control_byte_ ^= 1 << 5; // toggle control byte
 
@@ -261,76 +256,40 @@ bool knxControl::SendFrame()
   tail_[0] = chksum_ += control_byte_;
 
   // build frame
-  frame_.clear();
-  frame_.reserve(header_.size() + body_.size() + tail_.size());
-  frame_.insert(frame_.end(), header_.begin(), header_.end());
-  frame_.insert(frame_.end(), body_.begin(), body_.end());
-  frame_.insert(frame_.end(), tail_.begin(), tail_.end());
+  telegram_.clear();
+  telegram_.reserve(header_.size() + body_.size() + tail_.size());
+  telegram_.insert(telegram_.end(), header_.begin(), header_.end());
+  telegram_.insert(telegram_.end(), body_.begin(), body_.end());
+  telegram_.insert(telegram_.end(), tail_.begin(), tail_.end());
 
   // and send it to the knx bus
-  for (int i = 0; i < frame_.size(); i++)
+  for (int i = 0; i < telegram_.size(); i++)
   {
-    telegram << frame_[i];
-    std::cout << " " << std::hex << +frame_[i];
+    telegram_stream << telegram_[i];
+    std::cout << " " << std::hex << +telegram_[i];
   }
-  std::cout << " Odd frame sent" << std::endl;
-
-  // repeat last sended frame to make next frame even (link layer off)
-//   header_[4] = control_byte_ ^= 1 << 5;
-//   chksum_ = 0x00;
-
-//   for (int i = 0; i < body_.size(); i++)
-//     chksum_ += body_[i];
-
-//   tail_[0] = chksum_ += control_byte_;
-//   frame_.clear();
-//   frame_.insert(frame_.end(), header_.begin(), header_.end());
-//   frame_.insert(frame_.end(), body_.begin(), body_.end());
-//   frame_.insert(frame_.end(), tail_.begin(), tail_.end());
-
-//   for (int i = 0; i < frame_.size(); i++)
-//   {
-//     telegram << frame_[i];
-//     std::cout << std::hex << +frame_[i];
-//   }
-//   std::cout << " Even frame sent" << std::endl;
+  std::cout << " FT1.2 telegram sent" << std::endl;
 
   lloff_[4] = control_byte_ ^= 1 << 5;
 
-  // chksum_ = 0x00;
-
-  // for (int i = 0; i < lloff_.size(); i++)
-  //   chksum_ += lloff_[i];
-  // lloff_[13] = chksum_ += control_byte_;
-
   for (int i = 0; i < lloff_.size(); i++)
   {
-    telegram << lloff_[i];
+    telegram_stream << lloff_[i];
     std::cout << " " << std::hex << +lloff_[i];
   }
-  std::cout << " Link layer of Kberry switched off" << std::endl;
+  std::cout << " Link layer switched off" << std::endl;
 
-  // if(!telegram.good()){
-  // std::cout << "Goodbit=" << telegram.good();
-  // std::cout << "Eofbit=" << telegram.eof();
-  // std::cout << "Failbit=" << telegram.fail();
-  // std::cout << "Badbit=" << telegram.bad();
-  // std::cout << std::endl;
-  //}
-
-  //return telegram.good();
-    return 0;
+  return 0;
 }
-
 
 int main(void)
 {
-    knxControl control;
+  knxControl control;
 
-    std::vector<std::string> request{"3", "1", "10", "-aus"};
-    std::string dpt = "DPST-1-1";
-    control.SetData(request, dpt);
-    control.SendFrame();
+  std::vector<std::string> request{"3", "1", "10", "-aus"};
+  std::string dpt = "DPST-1-1";
+  control.SetData(request, dpt);
+  control.SendFrame();
 
-    return 0;
+  return 0;
 }
