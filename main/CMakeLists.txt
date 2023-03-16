@@ -1,20 +1,20 @@
 #for KNX HTTP Gateway
 
-#replace /home/golpe/knx/url_gateway/ by the path where you have cloned the knxGW project
+#replace /usr/local/ by the path where you have cloned the knxGW project
 
 cmake_minimum_required(VERSION 3.7.2)	
 project (KnxHttpGateway CXX)
 
 # Create variables that holds the path to our libraries
-set (HTTP_PATH /home/golpe/knx/url_gateway/iot_knx-gateway/libhttp/libhttp/build)
-set (KNX_MNG_PATH /home/golpe/knx/url_gateway/iot_knx-gateway/libknx-manage/libknx/manage/build)
-set (KNX_CTRL_PATH /home/golpe/knx/url_gateway/iot_knx-gateway/libknx-control/libknx/control/build)
+set (HTTP_PATH /usr/local/iot_knx-gateway/libhttp/libhttp/build)
+set (KNX_MNG_PATH /usr/local/iot_knx-gateway/libknx-manage/libknx/manage/build)
+set (KNX_CTRL_PATH /usr/local/iot_knx-gateway/libknx-control/libknx/control/build)
 
 #add headers
 include_directories (
-    /home/golpe/knx/url_gateway/iot_knx-gateway/libhttp/libhttp/
-    /home/golpe/knx/url_gateway/iot_knx-gateway/libknx-manage/libknx/manage/
-    /home/golpe/knx/url_gateway/iot_knx-gateway/libknx-control/libknx/control/
+    /usr/local/iot_knx-gateway/libhttp/libhttp/
+    /usr/local/iot_knx-gateway/libknx-manage/libknx/manage/
+    /usr/local/iot_knx-gateway/libknx-control/libknx/control/
 )
 
 # find library objects
@@ -33,7 +33,7 @@ endif()
 
 # Add main file to our executable output
 add_executable(KnxHttpGateway
-    /home/golpe/knx/url_gateway/iot_knx-gateway/main/main.cpp
+    /usr/local/iot_knx-gateway/main/main.cpp
 )
 target_include_directories(KnxHttpGateway
 	PUBLIC 
