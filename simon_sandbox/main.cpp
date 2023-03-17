@@ -109,17 +109,20 @@ std::vector<uint8_t> knxControl::ConvertNumberToKNXFloat(float number)
 
 void knxControl::SetValueToKNXString(std::string value_string)
 {
-  std::vector<char> knx_string(14);
+  std::uint8_t dpt_length = 0x0E; // DPT-16
+  std::vector<char> knx_string(dpt_length);
+  if (value_string.size() < dpt_length)
+    value_string.resize(dpt_length);
 
-  for (int i=value_string.length(), x=13; x>0; i--, x--)
+  for (int i = value_string.length(), x = dpt_length; x >= 0; i--, x--)
   {
     knx_string[x] = value_string[i];
   };
 
-  value_.resize(14); // 14 octets more for DPT-16
+  value_.resize(dpt_length);
   std::cout << "KNX string: ";
 
-  for (int i = 0; i < knx_string.size(); i++)
+  for (int i = 0; i <= knx_string.size(); i++)
   {
     value_[i] = knx_string[i];
     std::cout << value_[i];
@@ -229,11 +232,11 @@ void knxControl::SetValue(std::string requested_value)
     value_[1] = knx_float[1];
   }
   else if (requested_value.find("-text=") != std::string::npos)
-    {
-      std::string value_string = requested_value.substr(requested_value.find("=") + 1);
-      std::cout << "Requested text: " << value_string << std::endl;
-      SetValueToKNXString(value_string);
-    }
+  {
+    std::string value_string = requested_value.substr(requested_value.find("=") + 1);
+    std::cout << "Requested text: " << value_string << std::endl;
+    SetValueToKNXString(value_string);
+  }
 
   else
     std::cout << "invalid value" << std::endl;
@@ -273,14 +276,15 @@ bool knxControl::SendFrame()
   else if (dpt_ == 16)
   {
     body_[10] = kBool[0];
-    body_.resize(25); // 14 octets more for DPT16
-    body_[8] = 1 + value_.size();  // APDU + data
+    body_.resize(25);             // 14 octets more for DPT16
+    body_[8] = 1 + value_.size(); // APDU + data
 
-    for (int i = 0; i < value_.size(); i++) { 
-        body_[11+i] = value_[i]; 
-    } 
+    for (int i = 0, octet = 11; i <= value_.size(); i++, octet++)
+    {
+      body_[octet] = value_[i];
+      std::cout << value_[i];
+    }
   }
-
 
   // calculate destination groupaddress bytes
   body_[6] = (ga_[0] << 3) | ga_[1]; // destination high byte
@@ -327,7 +331,7 @@ int main(void)
 {
   knxControl control;
 
-  std::vector<std::string> request{"6", "6", "66", "-text=004917642048313"};
+  std::vector<std::string> request{"6", "6", "66", "-text=bla"};
   std::string dpt = "DPST-16-1";
   control.SetData(request, dpt);
   control.SendFrame();
