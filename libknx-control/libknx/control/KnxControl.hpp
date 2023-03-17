@@ -43,6 +43,7 @@ private:
     int dpt_ = -1;
 
     std::vector<uint8_t> ConvertNumberToKNXFloat(float number);
+    void SetValueToKNXString(std::string value_string);
     uint8_t GetDatapointType(std::string str);
     void SetGroupaddress(std::string main_group, std::string mid_group, std::string address);
     void SetValue(std::string requested_value);

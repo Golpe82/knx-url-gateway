@@ -41,6 +41,7 @@ private:
   int dpt_ = -1;
 
   std::vector<uint8_t> ConvertNumberToKNXFloat(float number);
+  void SetValueToKNXString(std::string value_string);
   uint8_t GetDatapointType(std::string str);
   void SetGroupaddress(std::string main_group, std::string mid_group, std::string address);
   void SetValue(std::string requested_value);
@@ -104,6 +105,29 @@ std::vector<uint8_t> knxControl::ConvertNumberToKNXFloat(float number)
   uint8_t lso = (uint8_t)(knx_float & 0xFF);
 
   return {mso, lso};
+}
+
+void knxControl::SetValueToKNXString(std::string value_string)
+{
+  std::uint8_t dpt_length = 0x0E; // DPT-16
+  std::vector<char> knx_string(dpt_length);
+  if (value_string.size() < dpt_length)
+    value_string.resize(dpt_length);
+
+  for (int i = value_string.length(), x = dpt_length; x >= 0; i--, x--)
+  {
+    knx_string[x] = value_string[i];
+  };
+
+  value_.resize(dpt_length);
+  std::cout << "KNX string: ";
+
+  for (int i = 0; i <= knx_string.size(); i++)
+  {
+    value_[i] = knx_string[i];
+    std::cout << value_[i];
+  }
+  std::cout << std::endl;
 }
 
 uint8_t knxControl::GetDatapointType(std::string str)
@@ -196,6 +220,7 @@ void knxControl::SetValue(std::string requested_value)
     value_[0] = kDimm[1];
   else if (requested_value == "-plus")
     value_[0] = kDimm[0];
+  // TODO: refactor -send_celsius like -text. SetValueToKNXFloat
   else if (requested_value.find("-send_celsius=") != std::string::npos)
   {
     std::string value_string = requested_value.substr(requested_value.find("=") + 1);
@@ -206,6 +231,13 @@ void knxControl::SetValue(std::string requested_value)
     value_[0] = knx_float[0];
     value_[1] = knx_float[1];
   }
+  else if (requested_value.find("-text=") != std::string::npos)
+  {
+    std::string value_string = requested_value.substr(requested_value.find("=") + 1);
+    std::cout << "Requested text: " << value_string << std::endl;
+    SetValueToKNXString(value_string);
+  }
+
   else
     std::cout << "invalid value" << std::endl;
 }
@@ -239,6 +271,19 @@ bool knxControl::SendFrame()
     body_[8] = 0x03;  // APDU + data
     body_[11] = value_[0];
     body_[12] = value_[1];
+  }
+
+  else if (dpt_ == 16)
+  {
+    body_[10] = kBool[0];
+    body_.resize(25);             // 14 octets more for DPT16
+    body_[8] = 1 + value_.size(); // APDU + data
+
+    for (int i = 0, octet = 11; i <= value_.size(); i++, octet++)
+    {
+      body_[octet] = value_[i];
+      std::cout << value_[i];
+    }
   }
 
   // calculate destination groupaddress bytes
@@ -286,8 +331,8 @@ int main(void)
 {
   knxControl control;
 
-  std::vector<std::string> request{"3", "1", "10", "-aus"};
-  std::string dpt = "DPST-1-1";
+  std::vector<std::string> request{"6", "6", "66", "-text=bla"};
+  std::string dpt = "DPST-16-1";
   control.SetData(request, dpt);
   control.SendFrame();
 
